@@ -17,6 +17,13 @@ public class App {
         runCamelRoute(2000);
     }
     
+    /**
+     * Performs conversion from hl7 to fhir json
+     * 
+     * @param time how long to run the camel route for - there is not a good way to
+     *             terminate the route upon completion so we just use an arbitrary amount of time
+     * @throws Exception
+     */
     public static void runCamelRoute(Integer time) throws Exception {
         final String PATH_TO_INPUT = "file:app/src/main/resources/hl7?noop=true";
         final String PATH_TO_INTERMEDIATE = "app/src/main/resources/intermediate/intermediateXML.xml";
@@ -24,23 +31,20 @@ public class App {
         final String PATH_TO_OUTPUT = "app/src/main/resources/output/fhir.json";
         final String PATH_TO_STATUS = "app/src/main/resources/status/status.txt";
 
+        //was going to use this to terminate route on completion, didn't work but tracks status of conversion
         FileWriter statusFW = new FileWriter(PATH_TO_STATUS);
         statusFW.write("");
 
         CamelContext context = new DefaultCamelContext();
-        //not necessary?
-        // context.getEndpoint("file:app/src/main/resources/atlasmap-mapping.adm");
-        // context.getEndpoint("file:app/src/main/resources/message.hl7");
-        // context.getEndpoint("file:app/src/main/resources/out.json");
 
         context.addRoutes(new RouteBuilder() {
             public void configure() throws Exception {
                 from(PATH_TO_INPUT)
                     .convertBodyTo(String.class)
-                    //not sure what next 2 lines do - runs fine without them, ask Venki
                     .unmarshal()
-                    .hl7(false) //is this valid hl7? -> set to true
+                    .hl7(false) //checks if hl7 input is valid
                     .process(new Processor() {
+                        //convert hl7 to XML for processing
                         public void process(Exchange exchange) throws Exception {
                             final Message message = exchange.getIn().getBody(Message.class);
                             XMLParser parser = new DefaultXMLParser();
@@ -52,9 +56,10 @@ public class App {
                             exchange.getIn().setBody(payload);
                         }
                     })
-                    .to(MAP_TEMPLATE_NAME)
+                    .to(MAP_TEMPLATE_NAME) //run conversion
                     .convertBodyTo(String.class)
                     .process(new Processor() {
+                        //store converted fhir json
                         public void process(Exchange exchange) throws Exception {
                             String message = exchange.getIn().getBody(String.class);
                             FileWriter fw = new FileWriter(PATH_TO_OUTPUT);
