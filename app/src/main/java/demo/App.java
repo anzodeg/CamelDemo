@@ -16,12 +16,16 @@ public class App {
     public static void main(String[] args) throws Exception {
         runCamelRoute(2000);
     }
-
+    
     public static void runCamelRoute(Integer time) throws Exception {
         final String PATH_TO_INPUT = "file:app/src/main/resources/hl7?noop=true";
         final String PATH_TO_INTERMEDIATE = "app/src/main/resources/intermediate/intermediateXML.xml";
         final String MAP_TEMPLATE_NAME = "atlasmap:atlasmap-mapping.adm";
         final String PATH_TO_OUTPUT = "app/src/main/resources/output/fhir.json";
+        final String PATH_TO_STATUS = "app/src/main/resources/status/status.txt";
+
+        FileWriter statusFW = new FileWriter(PATH_TO_STATUS);
+        statusFW.write("");
 
         CamelContext context = new DefaultCamelContext();
         //not necessary?
@@ -35,7 +39,7 @@ public class App {
                     .convertBodyTo(String.class)
                     //not sure what next 2 lines do - runs fine without them, ask Venki
                     .unmarshal()
-                    .hl7(false)
+                    .hl7(false) //is this valid hl7? -> set to true
                     .process(new Processor() {
                         public void process(Exchange exchange) throws Exception {
                             final Message message = exchange.getIn().getBody(Message.class);
@@ -57,6 +61,7 @@ public class App {
                             fw.write(message);
                             fw.close();
                             System.out.println("Wrote Output");
+                            statusFW.write("Wrote Output");
                         }
                     });
             }
@@ -68,5 +73,6 @@ public class App {
         context.stop();
         context.close();
         System.out.println("Finished Route");
+        statusFW.close();
     }
 }
