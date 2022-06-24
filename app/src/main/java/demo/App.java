@@ -34,11 +34,6 @@ public class App {
         final String PATH_TO_INTERMEDIATE = "app/src/main/resources/intermediate/intermediateXML.xml";
         final String MAP_TEMPLATE_NAME = "atlasmap:atlasmap-mapping.adm";
         final String PATH_TO_OUTPUT = "app/src/main/resources/output/fhir.json";
-        final String PATH_TO_STATUS = "app/src/main/resources/status/status.txt";
-
-        //was going to use this to terminate route on completion, didn't work but tracks status of conversion
-        FileWriter statusFW = new FileWriter(PATH_TO_STATUS);
-        statusFW.write("");
 
         CamelContext context = new DefaultCamelContext();
 
@@ -75,7 +70,6 @@ public class App {
                             fw.write(prettyJson);
                             fw.close();
                             System.out.println("Wrote Output");
-                            statusFW.write("Wrote Output");
                         }
                     });
             }
@@ -87,6 +81,5 @@ public class App {
         context.stop();
         context.close();
         System.out.println("Finished Route");
-        statusFW.close();
     }
 }
