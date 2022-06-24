@@ -43,6 +43,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.camel/camel-atlasmap
     implementation 'org.apache.camel:camel-atlasmap:3.16.0'
+
+    implementation 'com.google.code.gson:gson:2.9.0'
+
 }
 
 application {

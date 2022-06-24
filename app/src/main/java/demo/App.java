@@ -8,6 +8,11 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.parser.DefaultXMLParser;
 import ca.uhn.hl7v2.parser.XMLParser;
@@ -63,7 +68,11 @@ public class App {
                         public void process(Exchange exchange) throws Exception {
                             String message = exchange.getIn().getBody(String.class);
                             FileWriter fw = new FileWriter(PATH_TO_OUTPUT);
-                            fw.write(message);
+                            //add whitespace to json for readability
+                            JsonElement json = JsonParser.parseString(message);
+                            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                            String prettyJson = gson.toJson(json);
+                            fw.write(prettyJson);
                             fw.close();
                             System.out.println("Wrote Output");
                             statusFW.write("Wrote Output");
