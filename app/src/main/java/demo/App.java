@@ -19,7 +19,7 @@ import ca.uhn.hl7v2.parser.XMLParser;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        runCamelRoute(2000);
+        runCamelRoute(5000);
     }
     
     /**

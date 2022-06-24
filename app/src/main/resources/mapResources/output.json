@@ -1,0 +1,16 @@
+{
+    "resourceType": "Patient",
+    "id": "10006579",
+    "name": [
+        {
+            "family": "DUCK",
+            "given": [
+                "DONALD"
+            ]
+        }
+    ],
+    "birthdate": "19241010",
+    "gender": "male",
+    "address": "",
+    "telecom": "8885551212"
+}

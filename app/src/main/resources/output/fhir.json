@@ -1,5 +1,4 @@
 {
-  "resourceType": "Patient",
   "name": [
     {
       "family": "DUCK",
@@ -7,5 +6,10 @@
         "DONALD"
       ]
     }
-  ]
+  ],
+  "resourceType": "Patient",
+  "birthdate": "19241010",
+  "gender": "male",
+  "telecom": "8885551212",
+  "address": "111 DUCKST FOWL CA 999990000 M"
 }
