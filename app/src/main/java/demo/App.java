@@ -1,6 +1,7 @@
 package demo;
 
 import java.io.FileWriter;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -19,7 +20,7 @@ import ca.uhn.hl7v2.parser.XMLParser;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        runCamelRoute(5000);
+        runCamelRoute();
     }
     
     /**
@@ -29,11 +30,13 @@ public class App {
      *             terminate the route upon completion so we just use an arbitrary amount of time
      * @throws Exception
      */
-    public static void runCamelRoute(Integer time) throws Exception {
+    public static void runCamelRoute() throws Exception {
         final String PATH_TO_INPUT = "file:app/src/main/resources/hl7?noop=true";
         final String PATH_TO_INTERMEDIATE = "app/src/main/resources/intermediate/intermediateXML.xml";
         final String MAP_TEMPLATE_NAME = "atlasmap:atlasmap-mapping.adm";
         final String PATH_TO_OUTPUT = "app/src/main/resources/output/fhir.json";
+
+        CountDownLatch cdl = new CountDownLatch(1);
 
         CamelContext context = new DefaultCamelContext();
 
@@ -71,13 +74,20 @@ public class App {
                             fw.close();
                             System.out.println("Wrote Output");
                         }
-                    });
+                    })
+                    //use countDownLatch to indicate route has finished processing
+                    .process(new Processor() {
+                        public void process(Exchange exchange) throws Exception {
+                            cdl.countDown();
+                        }
+                    })
+                    ;
             }
         });
 
         System.out.println("Started Route");
         context.start();
-        Thread.sleep(time);
+        cdl.await(); //wait for latch countdown signifying route is finished
         context.stop();
         context.close();
         System.out.println("Finished Route");
